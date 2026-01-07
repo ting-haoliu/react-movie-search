@@ -10,6 +10,7 @@ const SignUpModal = ({ isOpen, onClose }) => {
    const [name, setName] = useState('');
    const [email, setEmail] = useState('');
    const [password, setPassword] = useState('');
+   const [confirmPassword, setConfirmPassword] = useState('');
    const [error, setError] = useState({});
 
    useEffect(() => {
@@ -18,18 +19,17 @@ const SignUpModal = ({ isOpen, onClose }) => {
          setName('');
          setEmail('');
          setPassword('');
+         setConfirmPassword('');
          setError({});
       }
    }, [isOpen]);
-
-   if (!isOpen) return null;
 
    const handleSignUp = async (e) => {
       e.preventDefault();
       setError({});
 
       try {
-         const result = await signUp(email, password, name);
+         const result = await signUp(email, password, confirmPassword, name);
 
          login(result.user);
          toast.success('Account created successfully!');
@@ -50,6 +50,8 @@ const SignUpModal = ({ isOpen, onClose }) => {
          }
       }
    };
+
+   if (!isOpen) return null;
 
    return (
       <div
@@ -93,6 +95,19 @@ const SignUpModal = ({ isOpen, onClose }) => {
                />
                {error.password && (
                   <p className="text-red-500 text-sm">{error.password}</p>
+               )}
+
+               <input
+                  type="password"
+                  placeholder="Confirm Password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="px-4 py-2 rounded bg-gray-800 text-white border border-gray-600 focus:outline-none focus:border-blue-500"
+               />
+               {error.confirmPassword && (
+                  <p className="text-red-500 text-sm">
+                     {error.confirmPassword}
+                  </p>
                )}
 
                {error.general && (
