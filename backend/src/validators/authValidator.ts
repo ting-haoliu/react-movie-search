@@ -5,6 +5,7 @@ export const registerValidator = [
       .trim()
       .notEmpty()
       .withMessage('Email is required')
+      .bail()
       .isEmail()
       .withMessage('Invalid email format')
       .normalizeEmail(),
@@ -12,10 +13,18 @@ export const registerValidator = [
    body('password')
       .notEmpty()
       .withMessage('Password is required')
+      .bail()
       .isLength({ min: 6 })
       .withMessage('Password must be at least 6 characters')
       .matches(/^(?=.*[A-Za-z])(?=.*\d)/)
       .withMessage('Password must contain letters and numbers'),
+
+   body('confirmPassword')
+      .notEmpty()
+      .withMessage('Confirm Password is required')
+      .bail()
+      .custom((value, { req }) => value === req.body.password)
+      .withMessage('Passwords do not match'),
 
    body('name')
       .optional()
@@ -29,6 +38,7 @@ export const loginValidator = [
       .trim()
       .notEmpty()
       .withMessage('Email is required')
+      .bail()
       .isEmail()
       .withMessage('Invalid email format'),
 

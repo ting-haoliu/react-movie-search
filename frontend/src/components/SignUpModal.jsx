@@ -1,25 +1,57 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 
 import { signUp } from '../services/auth';
+import { useAuth } from '../context/useAuth';
 
 const SignUpModal = ({ isOpen, onClose }) => {
+   const { login } = useAuth();
+
+   const [name, setName] = useState('');
    const [email, setEmail] = useState('');
    const [password, setPassword] = useState('');
-   const [error, setError] = useState(null);
+   const [confirmPassword, setConfirmPassword] = useState('');
+   const [error, setError] = useState({});
 
-   if (!isOpen) return null;
+   useEffect(() => {
+      if (isOpen) {
+         // Reset form fields and errors when the modal opens
+         setName('');
+         setEmail('');
+         setPassword('');
+         setConfirmPassword('');
+         setError({});
+      }
+   }, [isOpen]);
 
    const handleSignUp = async (e) => {
       e.preventDefault();
+      setError({});
 
       try {
-         await signUp(email, password);
+         const result = await signUp(email, password, confirmPassword, name);
 
+         login(result.user);
+         toast.success('Account created successfully!');
          onClose();
       } catch (err) {
-         setError(err.message);
+         try {
+            const errorArray = JSON.parse(err.message);
+            const fieldErrors = {};
+            errorArray.forEach((error) => {
+               if (error.field) {
+                  fieldErrors[error.field] = error.message;
+               }
+            });
+
+            setError(fieldErrors);
+         } catch {
+            setError({ general: err.message });
+         }
       }
    };
+
+   if (!isOpen) return null;
 
    return (
       <div
@@ -36,12 +68,24 @@ const SignUpModal = ({ isOpen, onClose }) => {
 
             <form onSubmit={handleSignUp} className="flex flex-col gap-4">
                <input
+                  type="text"
+                  placeholder="Name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="px-4 py-2 rounded bg-gray-800 text-white border border-gray-600 focus:outline-none focus:border-blue-500"
+               />
+
+               <input
                   type="email"
                   placeholder="Email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="px-4 py-2 rounded bg-gray-800 text-white border border-gray-600 focus:outline-none focus:border-blue-500"
                />
+               {error.email && (
+                  <p className="text-red-500 text-sm">{error.email}</p>
+               )}
+
                <input
                   type="password"
                   placeholder="Password"
@@ -49,8 +93,26 @@ const SignUpModal = ({ isOpen, onClose }) => {
                   onChange={(e) => setPassword(e.target.value)}
                   className="px-4 py-2 rounded bg-gray-800 text-white border border-gray-600 focus:outline-none focus:border-blue-500"
                />
+               {error.password && (
+                  <p className="text-red-500 text-sm">{error.password}</p>
+               )}
 
-               {error && <p className="text-red-500 text-sm">{error}</p>}
+               <input
+                  type="password"
+                  placeholder="Confirm Password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="px-4 py-2 rounded bg-gray-800 text-white border border-gray-600 focus:outline-none focus:border-blue-500"
+               />
+               {error.confirmPassword && (
+                  <p className="text-red-500 text-sm">
+                     {error.confirmPassword}
+                  </p>
+               )}
+
+               {error.general && (
+                  <p className="text-red-500 text-sm">{error.general}</p>
+               )}
 
                <button
                   type="submit"

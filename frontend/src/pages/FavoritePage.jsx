@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabaseClient';
+
+import { getFavorites } from '../services/favorite';
 import { useAuth } from '../context/useAuth';
 
 import Spinner from '../components/Spinner';
@@ -26,13 +27,14 @@ const FavoritePage = () => {
             return;
          }
 
-         const { data } = await supabase
-            .from('favorites')
-            .select('movie_id')
-            .eq('user_id', user.id);
-
-         const movieIds = data ? data.map((item) => item.movie_id) : [];
-         setFavorite(movieIds);
+         try {
+            const favoritesData = await getFavorites();
+            const movieIds = favoritesData.map((item) => item.movieId);
+            setFavorite(movieIds);
+         } catch (error) {
+            console.error('Error loading favorites:', error);
+            setFavorite([]);
+         }
       };
 
       loadFavorites();

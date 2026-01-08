@@ -18,3 +18,18 @@ export const findUserByEmail = async (email: string): Promise<User | null> => {
       where: { email },
    });
 };
+
+export const findUserById = async (
+   id: number
+): Promise<Omit<User, 'password'> | null> => {
+   return prisma.user.findUnique({
+      where: { id },
+      select: {
+         // no password field
+         id: true,
+         email: true,
+         name: true,
+         createdAt: true,
+      },
+   });
+};

@@ -1,39 +1,82 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 
 import { signIn } from '../services/auth';
+import { useAuth } from '../context/useAuth';
 
 const LoginModal = ({ isOpen, onClose, onSwitchToSignup }) => {
+   const { login } = useAuth();
    const [email, setEmail] = useState('');
    const [password, setPassword] = useState('');
-   const [error, setError] = useState(null);
+   const [error, setError] = useState({});
+
+   useEffect(() => {
+      if (isOpen) {
+         // Reset form fields and errors when the modal opens
+         setEmail('');
+         setPassword('');
+         setError({});
+      }
+   }, [isOpen]);
 
    if (!isOpen) return null;
 
    const handleSignIn = async (e) => {
       e.preventDefault();
+      setError({});
 
       try {
-         await signIn(email, password);
+         const result = await signIn(email, password);
 
+         login(result.user);
+         toast.success('Successfully signed in!');
          onClose();
       } catch (err) {
-         setError(err.message);
+         try {
+            const errorArray = JSON.parse(err.message);
+            const fieldErrors = {};
+            errorArray.forEach((error) => {
+               if (error.field) {
+                  fieldErrors[error.field] = error.message;
+               }
+            });
+
+            setError(fieldErrors);
+         } catch {
+            setError({ general: err.message });
+         }
       }
    };
 
    const handleGoogleSignIn = () => {
       console.log('Google Sign-In clicked');
+
+      toast.error('Google Sign-In is not implemented yet.');
    };
 
    const handleDemoSignIn = async (e) => {
       e.preventDefault();
 
       try {
-         await signIn('test@test', '123456');
+         const result = await signIn('test@abc.com', '123456asdfgh');
 
+         login(result.user);
+         toast.success('Successfully signed in as Demo User!');
          onClose();
       } catch (err) {
-         setError(err.message);
+         try {
+            const errorArray = JSON.parse(err.message);
+            const fieldErrors = {};
+            errorArray.forEach((error) => {
+               if (error.field) {
+                  fieldErrors[error.field] = error.message;
+               }
+            });
+
+            setError(fieldErrors);
+         } catch {
+            setError({ general: err.message });
+         }
       }
    };
 
@@ -62,6 +105,9 @@ const LoginModal = ({ isOpen, onClose, onSwitchToSignup }) => {
                      onChange={(e) => setEmail(e.target.value)}
                      className="px-4 py-2 rounded bg-gray-800 text-white border border-gray-600 focus:outline-none focus:border-blue-500"
                   />
+                  {error.email && (
+                     <p className="text-red-500 text-sm">{error.email}</p>
+                  )}
                </div>
 
                <div className="flex flex-col gap-2">
@@ -76,9 +122,14 @@ const LoginModal = ({ isOpen, onClose, onSwitchToSignup }) => {
                      onChange={(e) => setPassword(e.target.value)}
                      className="px-4 py-2 rounded bg-gray-800 text-white border border-gray-600 focus:outline-none focus:border-blue-500"
                   />
+                  {error.password && (
+                     <p className="text-red-500 text-sm">{error.password}</p>
+                  )}
                </div>
 
-               {error && <p className="text-red-500 text-sm">{error}</p>}
+               {error.general && (
+                  <p className="text-red-500 text-sm">{error.general}</p>
+               )}
 
                <button
                   type="submit"

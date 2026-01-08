@@ -5,8 +5,6 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes.js';
 import favoriteRoutes from './routes/favoriteRoutes.js';
 import { errorHandler } from './middlewares/errorHandler.js';
-import { register } from 'module';
-import { toggleFavorite } from './controllers/favoriteController.js';
 
 dotenv.config();
 

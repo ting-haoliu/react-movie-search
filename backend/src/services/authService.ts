@@ -1,7 +1,11 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
-import { createUser, findUserByEmail } from '../models/userModel.js';
+import {
+   createUser,
+   findUserByEmail,
+   findUserById,
+} from '../models/userModel.js';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -59,5 +63,21 @@ export const loginService = async (email: string, password: string) => {
    return {
       token,
       user: { id: user.id, email: user.email, name: user.name },
+   };
+};
+
+export const getCurrentUserService = async (userId: number) => {
+   const user = await findUserById(userId);
+
+   if (!user) {
+      const error = new Error('User not found');
+      (error as any).status = 404; // Not Found
+      throw error;
+   }
+
+   return {
+      id: user.id,
+      email: user.email,
+      name: user.name,
    };
 };

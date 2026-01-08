@@ -1,76 +1,84 @@
-import { supabase } from '../lib/supabaseClient';
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
-export const signUp = async (email, password) => {
-   const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
+export const signUp = async (email, password, confirmPassword, name) => {
+   const response = await fetch(`${API_URL}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, confirmPassword, name }),
    });
 
-   if (error) {
-      if (import.meta.env.DEV) {
-         console.error('Sign Up Error:', error);
+   const result = await response.json();
+
+   // Deal with errors from validator
+   if (!result.success) {
+      if (result.errors && Array.isArray(result.errors)) {
+         throw new Error(JSON.stringify(result.errors));
       }
-      throw new Error(error.message);
+
+      // Deal with general errors
+      throw new Error(result.message || 'Registration failed');
    }
 
-   return data;
+   localStorage.setItem('token', result.data.token);
+
+   return result.data;
 };
 
 export const signIn = async (email, password) => {
-   const {
-      data: { user, session },
-      error,
-   } = await supabase.auth.signInWithPassword({
-      email,
-      password,
+   const response = await fetch(`${API_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
    });
 
-   if (error) {
-      if (import.meta.env.DEV) {
-         console.error('Sign In Error:', error);
+   const result = await response.json();
+
+   if (!result.success) {
+      if (result.errors && Array.isArray(result.errors)) {
+         throw new Error(JSON.stringify(result.errors));
       }
-      throw new Error(error.message);
+
+      throw new Error(result.message || 'Login failed');
    }
 
-   return { user, session };
+   localStorage.setItem('token', result.data.token);
+
+   return { user: result.data.user, session: { token: result.data.token } };
 };
 
 export const signInWithGoogle = async () => {
-   const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-   });
-
-   if (error) {
-      if (import.meta.env.DEV) {
-         console.error('Sign In with Google Error:', error);
-      }
-      throw new Error(error.message);
-   }
+   throw new Error('Google sign-in not implemented yet');
 };
 
 export const signOut = async () => {
-   const { error } = await supabase.auth.signOut();
-
-   if (error) {
-      if (import.meta.env.DEV) {
-         console.error('Sign Out Error:', error);
-      }
-      throw new Error(error.message);
-   }
+   localStorage.removeItem('token');
 };
 
 export const getCurrentUser = async () => {
-   const {
-      data: { user },
-      error,
-   } = await supabase.auth.getUser();
+   const token = localStorage.getItem('token');
 
-   if (error) {
-      if (import.meta.env.DEV) {
-         console.error('Get Current User Error:', error);
-      }
-      throw new Error(error.message);
+   if (!token) {
+      return null;
    }
 
-   return user;
+   try {
+      const response = await fetch(`${API_URL}/auth/me`, {
+         headers: {
+            Authorization: `Bearer ${token}`,
+         },
+      });
+
+      const result = await response.json();
+
+      if (!result.success) {
+         localStorage.removeItem('token');
+         return null;
+      }
+
+      return result.data; // { id, email, name }
+   } catch (error) {
+      console.error('Get current user error:', error);
+      localStorage.removeItem('token');
+      return null;
+   }
 };

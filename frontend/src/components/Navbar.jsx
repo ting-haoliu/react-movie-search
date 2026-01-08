@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { signOut } from '../services/auth';
 import { useAuth } from '../context/useAuth';
+import toast from 'react-hot-toast';
 
 import LoginModal from './LoginModal';
 import SignUpModal from './SignUpModal';
@@ -14,12 +15,14 @@ const Navbar = () => {
    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
    const [isSignupModalOpen, setIsSignupModalOpen] = useState(false);
    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-   const { user } = useAuth();
+   const { user, logout, favoriteCount } = useAuth();
    const navigate = useNavigate();
 
    const handleSignOut = async () => {
       await signOut();
+      logout();
       setIsDropdownOpen(false);
+      toast.success('Signed out successfully');
 
       // redirect to home page after sign out
       navigate('/');
@@ -45,6 +48,9 @@ const Navbar = () => {
                   <Link to="/favorites" className="hover:text-red-400">
                      Favorites
                   </Link>
+                  <span className="ml-1 text-red-400 font-semibold">
+                     ({favoriteCount})
+                  </span>
                </li>
             )}
 
