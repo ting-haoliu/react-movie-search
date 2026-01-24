@@ -1,9 +1,6 @@
-const Spinner = ({ width = 8, height = 8, mt }) => {
+const Spinner = ({ width = 8, height = 8 }) => {
    return (
-      <span
-         role="status"
-         className={`flex justify-center items-center my-${mt}`}
-      >
+      <span role="status" className={`flex justify-center items-center`}>
          <svg
             aria-hidden="true"
             className={`w-${width} h-${height} text-gray-200 animate-spin dark:text-gray-600 fill-blue-600`}

@@ -186,7 +186,7 @@ const MovieDetailPage = () => {
                            )}
 
                            <button
-                              className={`flex justify-center items-center text-lg transition-colors border-2 rounded-lg px-3 py-1 min-w-[5.5rem] ${
+                              className={`flex justify-center items-center text-lg transition-colors ${
                                  isFavorite
                                     ? 'text-red-500 hover:text-red-400 border-red-500 hover:border-red-400'
                                     : 'text-gray-400 hover:text-gray-200 border-gray-400 hover:border-gray-200'
@@ -206,10 +206,6 @@ const MovieDetailPage = () => {
                                     {isFavorite ? '❤️' : '🤍'}
                                  </span>
                               )}
-
-                              <span className="ml-1">
-                                 {isFavorite ? 'Liked' : 'Like'}
-                              </span>
                            </button>
                         </div>
                      </div>
