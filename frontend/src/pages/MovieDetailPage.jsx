@@ -122,6 +122,29 @@ const MovieDetailPage = () => {
                      {/* Header */}
                      <div className="flex justify-between items-center p-6 border-b border-gray-800 md:py-4 lg:py-2">
                         <h1 className="text-2xl m-0">{movie.title}</h1>
+
+                        <button
+                           className={`flex justify-center items-center text-lg transition-colors ${
+                              isFavorite
+                                 ? 'text-red-500 hover:text-red-400 border-red-500 hover:border-red-400'
+                                 : 'text-gray-400 hover:text-gray-200 border-gray-400 hover:border-gray-200'
+                           }`}
+                           onClick={handleToggleFavorite}
+                           aria-label={
+                              isFavorite
+                                 ? 'Remove from favorites'
+                                 : 'Add to favorites'
+                           }
+                           disabled={isTogglingFavorite}
+                        >
+                           {isTogglingFavorite ? (
+                              <Spinner width={5} height={5} />
+                           ) : (
+                              <span className="text-lg">
+                                 {isFavorite ? '❤️' : '🤍'}
+                              </span>
+                           )}
+                        </button>
                      </div>
 
                      {/* Content */}
@@ -151,12 +174,14 @@ const MovieDetailPage = () => {
                                  min
                               </p>
                            </div>
+
                            <div>
                               <h3 className="font-medium text-gray-200">
                                  Release Date
                               </h3>
                               <p className="mt-1">{movie.release_date}</p>
                            </div>
+
                            <div>
                               <h3 className="font-medium text-gray-200">
                                  Rating
@@ -166,6 +191,7 @@ const MovieDetailPage = () => {
                                  {movie.vote_count} votes)
                               </p>
                            </div>
+
                            <div>
                               <p className="text-gray-300 text-lg leading-relaxed">
                                  {movie.overview}
@@ -184,29 +210,6 @@ const MovieDetailPage = () => {
                                  ))}
                               </div>
                            )}
-
-                           <button
-                              className={`flex justify-center items-center text-lg transition-colors ${
-                                 isFavorite
-                                    ? 'text-red-500 hover:text-red-400 border-red-500 hover:border-red-400'
-                                    : 'text-gray-400 hover:text-gray-200 border-gray-400 hover:border-gray-200'
-                              }`}
-                              onClick={handleToggleFavorite}
-                              aria-label={
-                                 isFavorite
-                                    ? 'Remove from favorites'
-                                    : 'Add to favorites'
-                              }
-                              disabled={isTogglingFavorite}
-                           >
-                              {isTogglingFavorite ? (
-                                 <Spinner width={5} height={5} />
-                              ) : (
-                                 <span className="text-lg">
-                                    {isFavorite ? '❤️' : '🤍'}
-                                 </span>
-                              )}
-                           </button>
                         </div>
                      </div>
                   </section>

@@ -74,3 +74,14 @@ export async function fetchMovieVideos(id) {
 
    return response.json();
 }
+
+export async function fetchMovieStreams(id) {
+   const endpoint = `${API_URL}/movie/${id}/watch/providers`;
+
+   const response = await fetch(endpoint, API_OPTIONS);
+   if (!response.ok) {
+      throw new Error('Failed to fetch movie streaming providers');
+   }
+
+   return response.json();
+}
