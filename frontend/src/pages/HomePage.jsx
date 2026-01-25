@@ -18,10 +18,10 @@ const HomePage = () => {
    const [trendingLoading, setTrendingLoading] = useState(false);
    const [debounceSearchTerm, setDebounceSearchTerm] = useState('');
 
+   // Infinite scroll states
    const [currentPage, setCurrentPage] = useState(1);
    const [hasMore, setHasMore] = useState(true);
    const [isLoadingMore, setIsLoadingMore] = useState(false);
-
    const observerTarget = useRef(null);
 
    // Debounce the search term to prevent making too many API request
@@ -126,12 +126,12 @@ const HomePage = () => {
 
       const currentTarget = observerTarget.current;
       if (currentTarget) {
-         observer.observe(currentTarget);
+         observer.observe(currentTarget); // Start observing the target element
       }
 
       return () => {
          if (currentTarget) {
-            observer.unobserve(currentTarget);
+            observer.unobserve(currentTarget); // Clean up the observer on unmount
          }
       };
    }, [loadMore]);

@@ -3,17 +3,18 @@ import { useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 import { useAuth } from '../context/useAuth';
+import Spinner from '../components/Spinner';
 import {
    getFavorites,
    toggleFavorite as toggleFavoriteAPI,
 } from '../services/favorite';
-import Spinner from '../components/Spinner';
-
 import {
    fetchMovieById,
    fetchMovieCredits,
    fetchMovieVideos,
+   fetchMovieStreams,
 } from '../services/tmdb';
+import { getUserLocation } from '../services/location';
 
 const MovieDetailPage = () => {
    const { id } = useParams();
@@ -21,6 +22,8 @@ const MovieDetailPage = () => {
    const [movie, setMovie] = useState(null);
    const [cast, setCast] = useState([]);
    const [videos, setVideos] = useState([]);
+   const [streams, setStreams] = useState(null);
+   const [region, setRegion] = useState('TW');
    const [isLoading, setIsLoading] = useState(false);
    const [errorMessage, setErrorMessage] = useState('');
    const [isFavorite, setIsFavorite] = useState(false);
@@ -84,15 +87,20 @@ const MovieDetailPage = () => {
       setErrorMessage('');
 
       try {
-         const [movieData, creditsData, videosData] = await Promise.all([
-            fetchMovieById(id),
-            fetchMovieCredits(id),
-            fetchMovieVideos(id),
-         ]);
+         const [movieData, creditsData, videosData, streamsData, userRegion] =
+            await Promise.all([
+               fetchMovieById(id),
+               fetchMovieCredits(id),
+               fetchMovieVideos(id),
+               fetchMovieStreams(id),
+               getUserLocation(),
+            ]);
 
          setMovie(movieData);
          setCast(creditsData.cast);
          setVideos(videosData.results);
+         setStreams(streamsData.results);
+         setRegion(userRegion);
       } catch (error) {
          console.error('Error fetching movie:', error);
          setErrorMessage('Failed to fetch movie. Please try again later.');
@@ -196,6 +204,39 @@ const MovieDetailPage = () => {
                               <p className="text-gray-300 text-lg leading-relaxed">
                                  {movie.overview}
                               </p>
+                           </div>
+
+                           {/* Streaming Providers */}
+                           <div>
+                              <h3 className="font-medium text-gray-200 mb-2">
+                                 Stream
+                              </h3>
+                              {streams?.[region]?.flatrate?.length > 0 ? (
+                                 <div className="flex flex-wrap gap-3">
+                                    {streams[region].flatrate.map(
+                                       (provider) => (
+                                          <a
+                                             key={provider.provider_id}
+                                             href={streams[region].link}
+                                             target="_blank"
+                                             rel="noopener noreferrer"
+                                             className="flex items-center gap-2 px-3 py-2 bg-gray-800 rounded-lg"
+                                          >
+                                             <img
+                                                src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
+                                                alt={provider.provider_name}
+                                                className="w-6 h-6 rounded"
+                                             />
+                                          </a>
+                                       )
+                                    )}
+                                 </div>
+                              ) : (
+                                 <p>
+                                    No streaming providers available in your
+                                    region.
+                                 </p>
+                              )}
                            </div>
 
                            {movie.genres && (
